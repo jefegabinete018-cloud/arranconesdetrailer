@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arrancones de Tráiler - El Mexicano</title>
+    <style>
+        :root {
+            --sidebar-bg: #090a0f;
+            --sidebar-hover: #171b26;
+            --accent: #e11d48; /* Rojo deportivo de alta competencia / Fuego */
+            --accent-hover: #be123c;
+            --bg: #030712; /* Negro asfalto absoluto */
+            --card-bg: #0d1322; /* Paneles metálicos oscuros */
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+            --border: #1f293d;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg); color: var(--text-main); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+
+        /* Sidebar Personalizado */
+        aside { width: 260px; background-color: var(--sidebar-bg); color: #fff; display: flex; flex-direction: column; flex-shrink: 0; border-right: 1px solid var(--border); }
+        .sidebar-brand { padding: 25px 20px; font-size: 20px; font-weight: bold; color: #fff; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+        .brand-logo-secret { width: 42px; height: 42px; background: var(--accent); color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 900; cursor: pointer; user-select: none; box-shadow: 0 4px 12px rgba(225, 29, 72, 0.4); }
+        
+        .sidebar-menu { list-style: none; padding: 0; margin: 20px 0; flex-grow: 1; }
+        .sidebar-menu li { padding: 14px 25px; cursor: pointer; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; gap: 12px; transition: all 0.2s; border-left: 4px solid transparent; font-size: 15px; }
+        .sidebar-menu li:hover, .sidebar-menu li.active { background-color: var(--sidebar-hover); color: #fff; border-left-color: var(--accent); }
+
+        /* Contenido Principal */
+        main { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; background-color: #060913; }
+        
+        .tournament-header { background: var(--card-bg); padding: 25px 40px; border-bottom: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.4); display: flex; justify-content: space-between; align-items: center; }
+        .tournament-title { font-size: 28px; font-weight: 800; color: #fff; margin: 0 0 5px 0; letter-spacing: 0.5px; }
+        .tournament-meta { display: flex; gap: 20px; font-size: 14px; color: var(--text-muted); }
+        .tournament-meta span { display: flex; align-items: center; gap: 6px; }
+
+        /* Indicador en Vivo */
+        .live-badge { background: rgba(225, 29, 72, 0.15); color: var(--accent); border: 1px solid var(--accent); padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 6px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        .content-body { padding: 30px 40px; max-width: 1200px; width: 100%; box-sizing: border-box; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Tarjetas */
+        .card { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); padding: 30px; margin-bottom: 25px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+        .card h3 { margin-top: 0; font-size: 20px; color: #fff; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+
+        /* Botones */
+        .btn-primary { background-color: var(--accent); color: white; border: none; padding: 12px 28px; font-size: 16px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: background 0.2s; box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3); }
+        .btn-primary:hover { background-color: var(--accent-hover); }
+
+        /* Tabla de Competidores */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--text-main); }
+        th { background-color: #171b26; font-weight: 600; color: var(--text-muted); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .truck-thumb { width: 75px; height: 50px; border-radius: 6px; object-fit: cover; background: #171b26; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--text-muted); text-align: center; }
+
+        /* Animación de Tómbola con Bolitas */
+        .tombola-box { background: #090a0f; border: 2px dashed #2a334d; padding: 30px; border-radius: 12px; margin-top: 25px; text-align: center; display: none; }
+        .caja-transparente { position: relative; width: 100%; height: 160px; background: rgba(13, 19, 34, 0.6); border: 2px solid #374151; border-radius: 10px; overflow: hidden; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 20px rgba(0,0,0,0.6); }
+        .bolita-azar { position: absolute; width: 45px; height: 45px; background: radial-gradient(circle at 30% 30%, #f43f5e, #9f1239); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); transition: all 0.1s linear; }
+        .estado-sorteo { font-size: 20px; font-weight: bold; color: #fb7185; margin-bottom: 15px; }
+        .pareja { background: #171b26; padding: 15px 20px; margin-bottom: 12px; border-radius: 8px; border-left: 5px solid var(--accent); box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-weight: bold; display: flex; justify-content: space-between; align-items: center; font-size: 16px; }
+
+        /* Modales y Panel Admin */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-content { background: var(--card-bg); padding: 35px; border-radius: 12px; width: 400px; text-align: center; border: 1px solid var(--border); box-shadow: 0 15px 35px rgba(0,0,0,0.6); }
+        .modal-content input { width: 100%; padding: 12px; margin: 15px 0; background: #090a0f; border: 1px solid var(--border); color: white; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+        
+        #admin-dashboard { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 900; overflow-y: auto; padding: 30px; box-sizing: border-box; }
+        .admin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
+        .admin-card { background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+        .admin-card img, .admin-card .preview-box { width: 100%; height: 140px; border-radius: 6px; object-fit: cover; background: #090a0f; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 13px; border: 1px solid var(--border); }
+        .admin-card input { width: 100%; padding: 10px; background: #090a0f; border: 1px solid var(--border); color: white; border-radius: 6px; box-sizing: border-box; font-size: 13px; }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Izquierdo -->
+    <aside>
+        <div class="sidebar-brand">
+            <!-- 5 clics rápidos aquí despliegan el acceso de administrador -->
+            <div class="brand-logo-secret" onclick="registrarClicLogo()" title="Panel Secreto">EM</div>
+            <span>Arrancones</span>
+        </div>
+        <ul class="sidebar-menu">
+            <li class="active" onclick="cambiarTab(event, 'tab-llave')">🎲 Sorteo y Tómbola</li>
+            <li onclick="cambiarTab(event, 'tab-posiciones')">🚛 Pilotos y Posiciones</li>
+            <li onclick="cambiarTab(event, 'tab-anuncios')">📜 Avisos y Reglas</li>
+            <li onclick="cambiarTab(event, 'tab-actividad')">🚦 Guía del Semáforo</li>
+        </ul>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main>
+        <div class="tournament-header">
+            <div>
+                <h1 class="tournament-title">Arrancones de Tráiler - El Mexicano</h1>
+                <div class="tournament-meta">
+                    <span>📍 Pista Oficial</span>
+                    <span>⏱️ Carriles Invertidos y Cronometraje</span>
+                </div>
+            </div>
+            <div class="live-badge">🔴 EN VIVO - TIEMPO REAL</div>
+        </div>
+
+        <div class="content-body">
+            
+            <!-- TAB 1: LLAVE / TÓMBOLA -->
+            <div id="tab-llave" class="tab-content active">
+                <div class="card">
+                    <h3>🎲 Sorteo Visual por Tómbola en Vivo</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 20px;">Inicia la tómbola para mezclar de forma aleatoria las máquinas y definir los cruces oficiales.</p>
+                    <button class="btn-primary" onclick="iniciarSorteoTombola()">Iniciar Sorteo en Vivo</button>
+                    
+                    <div id="tombola-contenedor" class="tombola-box">
+                        <div id="estado-sorteo" class="estado-sorteo">Preparando tómbola de máquinas...</div>
+                        <div id="caja-transparente" class="caja-transparente"></div>
+                        <div id="lista-parejas"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: POSICIONES Y PILOTOS -->
+            <div id="tab-posiciones" class="tab-content">
+                <div class="card">
+                    <h3>🚛 Competidores Inscritos</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Fotografía del Tráiler</th>
+                                <th>Piloto</th>
+                                <th>Tractocamión / Apodo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-competidores">
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: var(--text-muted);">Conectando en tiempo real con la base de datos...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 3: ANUNCIOS Y REGLAS -->
+            <div id="tab-anuncios" class="tab-content">
+                <div class="card">
+                    <h3>📜 Reglamento y Avisos Oficiales</h3>
+                    <p><strong>1. Dinámica de Carreras:</strong> Eliminatorias a dos de tres carreras; en la segunda ronda es obligatorio el cambio de carril.</p>
+                    <p><strong>2. Control de Tiempos:</strong> El sistema láser registra el tiempo oficial con precisión de milisegundos.</p>
+                    <p><strong>3. Seguridad:</strong> Zona de pits y arrancón restringida exclusivamente para pilotos y staff autorizado.</p>
+                </div>
+            </div>
+
+            <!-- TAB 4: SEMÁFORO -->
+            <div id="tab-actividad" class="tab-content">
+                <div class="card">
+                    <h3>🚦 Tutorial y Dinámica del Semáforo</h3>
+                    <p><strong>Luz Roja:</strong> Posicionamiento y enganche en la línea de partida.</p>
+                    <p><strong>Luces Ámbar:</strong> Secuencia de alerta y concentración (3, 2, 1).</p>
+                    <p><strong>Luz Verde:</strong> ¡Salida oficial! Liberación de aire y aceleración a fondo.</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- PANEL DE ADMINISTRADOR -->
+    <div id="admin-dashboard">
+        <div style="display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); color: white; padding: 20px 30px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 25px;">
+            <div>
+                <h2 style="margin: 0; color: #fff;">🛠 Panel de Control del Administrador</h2>
+                <p style="margin: 5px 0 0 0; font-size: 13px; color: var(--text-muted);">Asigna fotografías. Los cambios se actualizan automáticamente en el teléfono del público.</p>
+            </div>
+            <button class="btn-primary" style="background-color: #ef4444;" onclick="cerrarPanelAdmin()">Salir al Modo Público</button>
+        </div>
+
+        <div class="card">
+            <h3>📸 Gestión de Fotografías de Competidores</h3>
+            <div id="grid-admin-competidores" class="admin-grid"></div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONTRASEÑA ADMIN -->
+    <div id="modal-password" class="modal">
+        <div class="modal-content">
+            <h3>🔒 Acceso de Creador</h3>
+            <p style="font-size: 14px; color: var(--text-muted);">Introduce tu contraseña de administrador:</p>
+            <input type="password" id="admin-pass" placeholder="Contraseña" onkeypress="if(event.key === 'Enter') verificarPassword();">
+            <button class="btn-primary" onclick="verificarPassword()" style="width: 100%;">Ingresar</button>
+            <br><br>
+            <button style="background:none; border:none; color:var(--text-muted); cursor:pointer;" onclick="cerrarModalPassword()">Cancelar</button>
+        </div>
+    </div>
+
+    <script>
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxWhIky_zWUNyH_2PuiFOGktI97_uTJGO4nbeIm_aAZqftq_jt2RaOYwTBt8TQiMXVx/exec';
+        let listaCompetidores = [];
+        let fotosManuales = JSON.parse(localStorage.getItem('arrancones_fotos_manuales') || '{}');
+
+        function cambiarTab(evt, tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.sidebar-menu li').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            evt.currentTarget.classList.add('active');
+        }
+
+        let clicsLogo = 0;
+        let tiempoUltimoClic = 0;
+        function registrarClicLogo() {
+            let ahora = new Date().getTime();
+            if (ahora - tiempoUltimoClic > 1000) clicsLogo = 1;
+            else clicsLogo++;
+            tiempoUltimoClic = ahora;
+
+            if (clicsLogo >= 5) {
+                clicsLogo = 0;
+                document.getElementById('modal-password').style.display = 'flex';
+                document.getElementById('admin-pass').focus();
+            }
+        }
+
+        function cerrarModalPassword() {
+            document.getElementById('modal-password').style.display = 'none';
+            document.getElementById('admin-pass').value = '';
+        }
+
+        function verificarPassword() {
+            if (document.getElementById('admin-pass').value === "mexicano2026") {
+                cerrarModalPassword();
+                abrirPanelAdmin();
+            } else {
+                alert("Contraseña incorrecta.");
+            }
+        }
+
+        function abrirPanelAdmin() {
+            document.getElementById('admin-dashboard').style.display = 'block';
+            construirGridAdmin();
+        }
+
+        function cerrarPanelAdmin() {
+            document.getElementById('admin-dashboard').style.display = 'none';
+            cargarDatosSheets();
+        }
+
+        function construirGridAdmin() {
+            const grid = document.getElementById('grid-admin-competidores');
+            grid.innerHTML = '';
+            if (listaCompetidores.length === 0) {
+                grid.innerHTML = `<p style="color:var(--text-muted);">No hay competidores cargados.</p>`;
+                return;
+            }
+
+            listaCompetidores.forEach((c, index) => {
+                let fotoActual = fotosManuales[index] || c.foto || '';
+                let preview = `<div class="preview-box">Sin Fotografía</div>`;
+                if (fotoActual && fotoActual.startsWith('http')) {
+                    preview = `<img src="${fotoActual}" alt="Tráiler" onerror="this.onerror=null;this.parentNode.innerHTML='<div class=\'preview-box\'>Error URL</div>';">`;
+                }
+
+                grid.innerHTML += `
+                    <div class="admin-card">
+                        <strong>#${index + 1} - ${c.piloto}</strong>
+                        <span style="font-size:12px; color:var(--text-muted);">🚛 ${c.tracto}</span>
+                        ${preview}
+                        <input type="text" id="foto-input-${index}" value="${fotoActual}" placeholder="Pega el enlace directo de la foto">
+                        <button class="btn-primary" style="padding: 9px; font-size: 13px;" onclick="guardarFotoManual(${index})">💾 Guardar Fotografía</button>
+                    </div>
+                `;
+            });
+        }
+
+        function guardarFotoManual(index) {
+            let url = document.getElementById(`foto-input-${index}`).value.trim();
+            fotosManuales[index] = url;
+            localStorage.setItem('arrancones_fotos_manuales', JSON.stringify(fotosManuales));
+            
+            // Disparar evento de sincronización para tiempo real local
+            window.dispatchEvent(new Event('storage'));
+            
+            alert("¡Fotografía guardada con éxito y sincronizada!");
+            construirGridAdmin();
+        }
+
+        // Cargar datos desde Google Sheets con sincronización automática
+        async function cargarDatosSheets() {
+            // Recargar fotos manuales por si hubo cambios en otra pestaña o dispositivo
+            fotosManuales = JSON.parse(localStorage.getItem('arrancones_fotos_manuales') || '{}');
+
+            try {
+                const res = await fetch(APPS_SCRIPT_URL);
+                const datos = await res.json();
+                listaCompetidores = datos;
+                const tbody = document.getElementById('tabla-competidores');
+                tbody.innerHTML = '';
+
+                if (listaCompetidores.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No hay competidores registrados.</td></tr>`;
+                    return;
+                }
+
+                listaCompetidores.forEach((c, index) => {
+                    let fotoFinal = fotosManuales[index] || c.foto || '';
+                    let fotoHtml = `<div class="truck-thumb">Sin Foto</div>`;
+                    if (fotoFinal && fotoFinal.startsWith('http')) {
+                        fotoHtml = `<img src="${fotoFinal}" class="truck-thumb" alt="Tráiler" onerror="this.onerror=null;this.parentNode.innerHTML='<div class=\'truck-thumb\'>Error</div>';">`;
+                    }
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><strong>#${index + 1}</strong></td>
+                            <td>${fotoHtml}</td>
+                            <td>${c.piloto}</td>
+                            <td>${c.tracto}</td>
+                        </tr>
+                    `;
+                });
+            } catch (err) {
+                console.error(err);
+                document.getElementById('tabla-competidores').innerHTML = `<tr><td colspan="4" style="text-align: center; color: red;">Error al conectar con la base de datos.</td></tr>`;
+            }
+        }
+
+        // Animación de Tómbola con Bolitas
+        function iniciarSorteoTombola() {
+            if (listaCompetidores.length < 2) {
+                alert("Se necesitan al menos 2 competidores inscritos para realizar el sorteo.");
+                return;
+            }
+
+            const cajaContenedor = document.getElementById('tombola-contenedor');
+            const cajaTransparente = document.getElementById('caja-transparente');
+            const estadoSorteo = document.getElementById('estado-sorteo');
+            const resultados = document.getElementById('lista-parejas');
+
+            cajaContenedor.style.display = 'block';
+            resultados.innerHTML = '';
+            cajaTransparente.innerHTML = '';
+            estadoSorteo.innerHTML = "🎲 ¡Mezclando bolitas en la tómbola oficial!";
+
+            let bolitas = [];
+            for (let i = 0; i < listaCompetidores.length; i++) {
+                let b = document.createElement('div');
+                b.className = 'bolita-azar';
+                b.innerText = i + 1;
+                b.style.left = Math.random() * 80 + '%';
+                b.style.top = Math.random() * 60 + '%';
+                cajaTransparente.appendChild(b);
+                bolitas.push(b);
+            }
+
+            let movimiento = setInterval(() => {
+                bolitas.forEach(b => {
+                    let randomX = (Math.random() - 0.5) * 40;
+                    let randomY = (Math.random() - 0.5) * 30;
+                    let currentLeft = parseFloat(b.style.left);
+                    let currentTop = parseFloat(b.style.top);
+                    b.style.left = Math.max(5, Math.min(90, currentLeft + randomX)) + '%';
+                    b.style.top = Math.max(5, Math.min(75, currentTop + randomY)) + '%';
+                });
+            }, 150);
+
+            setTimeout(() => {
+                clearInterval(movimiento);
+                estadoSorteo.innerHTML = "🏁 ¡Parejas Seleccionadas al Azar! 🏁";
+                cajaTransparente.innerHTML = '<div style="color: #fb7185; font-weight: bold; font-size: 18px; display:flex; align-items:center; height:100%; justify-content:center;">¡Sorteo Concluido con Éxito!</div>';
+                generarParejasFinales(resultados);
+            }, 3500);
+        }
+
+        function generarParejasFinales(contenedor) {
+            let mezcla = [...listaCompetidores];
+            for (let i = mezcla.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [mezcla[i], mezcla[j]] = [mezcla[j], mezcla[i]];
+            }
+
+            let numCarrera = 1;
+            for (let i = 0; i < mezcla.length; i += 2) {
+                if (i + 1 < mezcla.length) {
+                    contenedor.innerHTML += `
+                        <div class="pareja">
+                            <span>Carrera ${numCarrera}: 🚀 ${mezcla[i].piloto} <small style="color:var(--text-muted);">(${mezcla[i].tracto})</small></span> 
+                            <span style="color:var(--accent); font-size: 18px;">VS</span> 
+                            <span>🚛 ${mezcla[i+1].piloto} <small style="color:var(--text-muted);">(${mezcla[i+1].tracto})</small></span>
+                        </div>`;
+                } else {
+                    contenedor.innerHTML += `
+                        <div class="pareja" style="border-left-color: #3b82f6;">
+                            <span>Pase Directo: ⭐ ${mezcla[i].piloto} <small style="color:var(--text-muted);">(${mezcla[i].tracto})</small></span> 
+                            <span style="color: #3b82f6;">Pasa libre a siguiente ronda</span>
+                        </div>`;
+                }
+                numCarrera++;
+            }
+        }
+
+        // --- SISTEMA DE TIEMPO REAL (SINCRONIZACIÓN AUTOMÁTICA) ---
+        // 1. Carga inicial al abrir la página
+        window.onload = () => {
+            cargarDatosSheets();
+        };
+
+        // 2. Escuchar cambios instantáneos si se actualiza información en otra pestaña o dispositivo local
+        window.addEventListener('storage', (e) => {
+            cargarDatosSheets();
+        });
+
+        // 3. Sincronización automática de fondo cada 8 segundos para refrescar datos de Google Sheets sin molestar al usuario
+        setInterval(() => {
+            cargarDatosSheets();
+        }, 8000);
+    </script>
+</body>
+</html>
